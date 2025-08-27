@@ -6,18 +6,27 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Print Welcome Message
-        run: echo "Hello! CI/CD workflow running for Daily Tasks App."
+      - name: Build Step
+        run: echo "Build done: repository checked out and ready"
 
-      - name: Run Test - Check tasks.txt exists
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Test Step
         run: |
+          echo "Running tests..."
           if [ -f tasks.txt ]; then
             echo "Test Passed: tasks.txt exists!"
           else
@@ -25,8 +34,17 @@ jobs:
             exit 1
           fi
 
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./   # deploy root folder
+
